@@ -11,50 +11,23 @@ PangoFontMap *map;
 PangoContext *ctx;
 PangoFont *ft;
 
-void set_font (PangoFontDescription *desc){}
-
-/*
-void draw_outline (cairo_t *cr, list_item *o)
-{
-		ct = (Cut *)n->data;
-		cv = (Curve *)n->data;
-
-		switch (ct->action) {
-			case Move:
-				cairo_move_to (cr, ct->end.x, ct->end.y);
-				break;
-			case Line:
-				cairo_line_to (cr, ct->end.x, ct->end.y);
-				break;
-			case Cw:
-				cairo_arc (cr, cv->center.x, cv->center.y,
-						cv->radius,
-						cv->angle1, cv->angle2);
-				break;
-			case Ccw:
-				cairo_arc_negative (cr, cv->center.x, cv->center.y,
-						cv->radius,
-						cv->angle1, cv->angle2);
-				break;
-}
-*/
+void set_font (PangoFontDescription *desc);
 
 static gboolean
-expose_event (GtkWidget *widget, GdkEventExpose *event)
+expose_event (GtkWidget *widget, GdkEventExpose *event, GtkWidget *str)
 {
 	cairo_t *cr;
-	double cx, cy, cw, ch;
+	double cw, ch;
 	int i;
+	char *s;
 
+	s = (char *) gtk_entry_get_text (GTK_ENTRY (str));
 	cr = gdk_cairo_create (widget->window);
 	cairo_set_source_rgb (cr, 0, 0, 0);
 	cairo_set_line_width (cr, 0.5);
-	cx = cy = 1.0;
-	cw = (double)widget->allocation.width - 2;
-	ch = (double)widget->allocation.height - 2;
-	
-	cairo_rectangle (cr, cx, cy, cw, ch);
-//	cairo_new_sub_path (cr);
+	cw = (double)widget->allocation.width;
+	ch = (double)widget->allocation.height;
+	generate_image (s, cr, cw, ch);	
 	cairo_stroke (cr);
 	cairo_destroy (cr);
 	return TRUE;
@@ -73,12 +46,15 @@ static void font_button_clicked (GtkFontButton *button)
 
 static void g_button_clicked (GObject *button, GtkWidget *str)
 {
-	printf ("Current text %s\n", gtk_entry_get_text (GTK_ENTRY (str)));
+	char *s;
+
+	s = (char *) gtk_entry_get_text (GTK_ENTRY (str));
+	generate_gcode (s);
 }
 
-static void d_button_clicked (GObject *button, GtkWidget *str)
+static void d_button_clicked (GObject *button, GtkWidget *canvas)
 {
-	printf ("Current text %s\n", gtk_entry_get_text (GTK_ENTRY (str)));
+	gtk_widget_queue_draw (canvas);
 }
 
 int main(int argc, char *argv[]) 
@@ -121,13 +97,15 @@ int main(int argc, char *argv[])
 	gtk_box_pack_start_defaults (GTK_BOX (vbox), canvas);
 	gtk_box_pack_start_defaults (GTK_BOX (vbox), hbox);
 
+	g_object_set_data (G_OBJECT (d_button), "canvas", canvas);
+
 	gtk_container_add (GTK_CONTAINER (window), vbox);
 
 	g_signal_connect(window, "destroy",
 		G_CALLBACK(gtk_main_quit), NULL);  
 
 	g_signal_connect(G_OBJECT (canvas), "expose_event",
-		G_CALLBACK(expose_event), NULL);  
+		G_CALLBACK(expose_event), str);  
 
 	g_signal_connect(G_OBJECT (font_button), "font_set",
 		G_CALLBACK(font_button_clicked), NULL);  
@@ -136,7 +114,7 @@ int main(int argc, char *argv[])
 		G_CALLBACK(g_button_clicked), str);  
 
 	g_signal_connect(G_OBJECT (d_button), "clicked",
-		G_CALLBACK(d_button_clicked), str);  
+		G_CALLBACK(d_button_clicked), canvas);  
 
 	gtk_widget_show_all(window);
 	map = pango_ft2_font_map_new ();

@@ -1,6 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "fconv.h"
+
+#define GLYPH_PART_INCREMENT 20
 
 static double cm[3][3];
 
@@ -60,7 +64,7 @@ static void tr_point (point_t *o)
 
 static void tr_glyph (glyph_t *g)
 {
-	int i, j;
+	int i, j, c;
 	gpart_t *gp = g->col;
 	
 	for (j = 0, gp = g->col; j < g->cur; j++, gp++) {
@@ -87,15 +91,21 @@ static void tr_glyph (glyph_t *g)
 
 void offset_glyph (glyph_t *outline, double x, double y)
 {
+	if (x == 0 && y == 0)
+		return;
 	offset_cm (x, y);
 	tr_glyph (outline);
 }
 
 void scale_glyph (glyph_t *outline, double s)
 {
+	if (s == 1)
+		return;
 	scale_cm (s);
 	tr_glyph (outline);
+	outline->adv *= s;
 	outline->asc *= s;
+	outline->dsc *= s;
 }
 
 void rotate_glyph (glyph_t *outline, double a)
@@ -166,6 +176,8 @@ glyph_t *duplicate_glyph (glyph_t *g)
 	}
 	d->cur = g->cur;
 	d->asc = g->asc;
+	d->dsc = g->dsc;
+	d->adv = g->adv;
 	d->max = g->cur;
 	d->col = malloc (d->max * sizeof (gpart_t));
 	if (d->col == NULL) {
@@ -175,3 +187,41 @@ glyph_t *duplicate_glyph (glyph_t *g)
 	memcpy (d->col, g->col, d->max * sizeof (gpart_t));
 	return d;
 }
+
+void get_cbox (glyph_t *g, rect_t *c)
+{
+	gpart_t *gp;
+	int i, j, l;
+	double xmin, ymin, xmax, ymax;
+
+	gp = g->col;
+	if (gp->type != move_to) {
+		printf ("glyph is not started with move_to\n");
+		exit (1);
+	}
+	xmin = xmax = gp->points[1].x;
+	ymin = ymax = gp->points[1].y;
+	gp++;
+	for (i = 1; i < g->cur; i++, gp++) {
+		if (gp->type == move_to)
+			continue;
+
+		l = (gp->type == line_to) ? 2 :
+		    (gp->type == conic_to) ? 3 : 4;
+		for (j = 1; j < l; j++) {
+			if (xmin > gp->points[j].x)
+				xmin = gp->points[j].x;
+			else if (xmax < gp->points[j].x)
+				xmax = gp->points[j].x;
+			else if (ymin > gp->points[j].y)
+				ymin = gp->points[j].y;
+			else if (ymax < gp->points[j].y)
+				ymax = gp->points[j].y;
+		}
+	}
+	c->lt.x = xmin;
+	c->lt.y = ymin;
+	c->rb.x = xmax;
+	c->rb.y = ymax;
+}
+			

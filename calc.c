@@ -4,6 +4,8 @@
 #include <math.h>
 #include "fconv.h"
 
+#define MAX_POINTS 256
+
 static point_t * bezier2 (point_t *pt)
 {
 	double t;
@@ -22,12 +24,12 @@ static point_t * bezier2 (point_t *pt)
 
 	for (i = 0; i < MAX_POINTS; i++) {
 		t = ((double)i)/(double)(MAX_POINTS - 1);
-		p[i].x = (1 - t) * (1 - t) * a->x +
-			2 * (1 - t) * t * b->x +
-			t * t * c->x;
-		p[i].y = (1 - t) * (1 - t) * a->y +
-			2 * (1 - t) * t * b->y +
-			t * t * c->y;
+		p[i].x = (1 - t) * (1 - t) * a.x +
+			2 * (1 - t) * t * b.x +
+			t * t * c.x;
+		p[i].y = (1 - t) * (1 - t) * a.y +
+			2 * (1 - t) * t * b.y +
+			t * t * c.y;
 	}
 	return p;
 }
@@ -36,7 +38,7 @@ static point_t * bezier3 (point_t *pt)
 {
 	double t;
 	int i;
-	point_t *p;
+	point_t a, b, c, d, *p;
 
 	p = malloc (sizeof (*p) * MAX_POINTS);
 	if (p == NULL) {
@@ -51,20 +53,20 @@ static point_t * bezier3 (point_t *pt)
 
 	for (i = 0; i < MAX_POINTS; i++) {
 		t = ((double)i)/(double)(MAX_POINTS - 1);
-		p[i].x = (1 - t) * (1 - t) * (1 - t) * a->x +
-			3 * (1 - t) * (1 - t) * t * b->x +
-			3 * (1 - t) * t * t * c->x + 
-			t * t * t * d->x;
-		p[i].y = (1 - t) * (1 - t) * (1 - t) * a->y +
-			3 * (1 - t) * (1 - t) * t * b->y +
-			3 * (1 - t) * t * t * c->y + 
-			t * t * t * d->y;
+		p[i].x = (1 - t) * (1 - t) * (1 - t) * a.x +
+			3 * (1 - t) * (1 - t) * t * b.x +
+			3 * (1 - t) * t * t * c.x + 
+			t * t * t * d.x;
+		p[i].y = (1 - t) * (1 - t) * (1 - t) * a.y +
+			3 * (1 - t) * (1 - t) * t * b.y +
+			3 * (1 - t) * t * t * c.y + 
+			t * t * t * d.y;
 	}
 	return p;
 }
 
 
-static void get_curve (int start, int size, point_t *p, curve_t *c)
+static void get_curve (int start, int size, point_t *p, curve_t *cv)
 {
 	point_t x0, x1, x2;
 	double a, b, c, d,
@@ -80,8 +82,8 @@ static void get_curve (int start, int size, point_t *p, curve_t *c)
 	x1.x = p[start + size / 2 - 1].x;
 	x1.y = p[start + size / 2 - 1].y;
 
-	c->start = x0;
-	c->end = x2;
+	cv->start = x0;
+	cv->end = x2;
 
 	a = x0.x * x0.x + x0.y * x0.y;
 	b = x0.x;
@@ -121,24 +123,24 @@ static void get_curve (int start, int size, point_t *p, curve_t *c)
 	if (a2 < a1) {
 		if ((a1 - a2) >= M_PI) {
 			a1 -= 2 * M_PI;
-			c->type = cw_circle;
+			cv->type = cw_circle;
 		} else {
-			c->type = ccw_circle;
+			cv->type = ccw_circle;
 		}
 	} else {
 		if ((a2 - a1) >= M_PI) {
 			a2 -= 2 * M_PI;
-			c->type = ccw_circle;
+			cv->type = ccw_circle;
 		} else {
-			c->type = cw_circle;
+			cv->type = cw_circle;
 		}
 	}
 
-	c->center.x = xc;
-	c->center.y = yc;
-	c->radius = r;
-	c->angle1 = a1;
-	c->angle2 = a2;
+	cv->center.x = xc;
+	cv->center.y = yc;
+	cv->radius = r;
+	cv->angle1 = a1;
+	cv->angle2 = a2;
 }
 
 void gp2cut (gpart_t *gp, cut_t *c)
@@ -150,7 +152,7 @@ void gp2cut (gpart_t *gp, cut_t *c)
 
 void gp2curve (gpart_t *gp, curve_t *c)
 {
-	point *bz;
+	point_t *bz;
 
 	bz = (gp->type == conic_to) ? 
 		bezier2 (gp->points) : bezier3 (gp->points);
@@ -158,6 +160,6 @@ void gp2curve (gpart_t *gp, curve_t *c)
 	get_curve (0, 65, bz, c++);
 	get_curve (64, 65, bz, c++);
 	get_curve (128, 65, bz, c++);
-	get_curve (192, 65, bz, c);
+	get_curve (192, 64, bz, c);
 }
 

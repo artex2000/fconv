@@ -60,7 +60,7 @@ static int line3 (const FT_Vector *a, const FT_Vector *b,
 	return (r1 == r2) ? 1 : 0;
 }
 
-static int move_to (const FT_Vector *to, void *user)
+static int f_move_to (const FT_Vector *to, void *user)
 {
 	gpart_t gp;
 
@@ -74,7 +74,7 @@ static int move_to (const FT_Vector *to, void *user)
 	return 0;
 }
 
-static int line_to (const FT_Vector *to, void *user)
+static int f_line_to (const FT_Vector *to, void *user)
 {
 	gpart_t gp;
 
@@ -88,13 +88,13 @@ static int line_to (const FT_Vector *to, void *user)
 	return 0;
 }
 
-static int conic_to (const FT_Vector *c1, const FT_Vector *to, void *user)
+static int f_conic_to (const FT_Vector *c1, const FT_Vector *to, void *user)
 {
 	gpart_t gp;
 
 //	printf ("%d: conic to %+d:%+d %+d:%+d\n", piece, c1->x, c1->y, to->x, to->y);
 	if (line3 (&last, c1, to)) 
-		return line_to (to, user);
+		return f_line_to (to, user);
 
 	gp.type = conic_to;
 	ft2d (&last, &(gp.points[0]));
@@ -105,7 +105,7 @@ static int conic_to (const FT_Vector *c1, const FT_Vector *to, void *user)
 	return 0;
 }
 
-static int cubic_to (const FT_Vector *c1, const FT_Vector *c2, 
+static int f_cubic_to (const FT_Vector *c1, const FT_Vector *c2, 
 	      const FT_Vector *to, void *user)
 {
 	gpart_t gp;
@@ -113,7 +113,7 @@ static int cubic_to (const FT_Vector *c1, const FT_Vector *c2,
 //	printf ("%d: cubic to %+d:%+d %+d:%+d %+d:%+d\n", piece, c1->x, c1->y, 
 //			c2->x, c2->y, to->x, to->y);
 	if (line4 (&last, c1, c2, to))
-		return line_to (to, user);
+		return f_line_to (to, user);
 
 	gp.type = cubic_to;
 	ft2d (&last, &(gp.points[0]));
@@ -142,10 +142,10 @@ void outline_glyph (char c, glyph_t *g)
 
 	ifs.shift = 0;
 	ifs.delta = 0;
-	ifs.move_to = move_to;
-	ifs.line_to = line_to;
-	ifs.conic_to = conic_to;
-	ifs.cubic_to = cubic_to;
+	ifs.move_to = f_move_to;
+	ifs.line_to = f_line_to;
+	ifs.conic_to = f_conic_to;
+	ifs.cubic_to = f_cubic_to;
 
 //	printf ("=============decomposing glyph %c\n", c);
 

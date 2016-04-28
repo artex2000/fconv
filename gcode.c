@@ -129,7 +129,7 @@ static void process_glyph (glyph_t *g)
 {
 	cut_t ct;
 	curve_t cv[4];
-	gpart_t *gp, next;
+	gpart_t *gp, *next;
 	int i, j;
 
 	fprintf (fp, "G40 ");
@@ -137,19 +137,19 @@ static void process_glyph (glyph_t *g)
 	for (i = 0, gp = g->col; i < g->cur; i++, gp++) {
 		if (i < g->cur - 1) {
 			next = gp + 1;
-			if (gp->type == line && next->type == line)
+			if (gp->type == line_to && next->type == line_to)
 				modal_stop ();
 			else
 				modal_smooth ();
 		}
 
-		if (gp->type == move || gp->type == line) {
+		if (gp->type == move_to || gp->type == line_to) {
 			gp2cut (gp, &ct);
 			cut2gcode (&ct);
 		} else {
 			gp2curve (gp, cv);
 			for (j = 0; j < 4; j++)
-				curve2gcode (cv[j]);
+				curve2gcode (&cv[j]);
 		}
 	}
 	fprintf (fp, "G00 Z0\n");	//router up
@@ -172,7 +172,7 @@ static void epilogue (void)
 	fprintf (fp, "M30\n");
 }
 
-void glyph2gcode (glyph_t *p, int cnt)
+static void glyph2gcode (glyph_t **p, int cnt)
 {
 	int i;
 
@@ -183,8 +183,20 @@ void glyph2gcode (glyph_t *p, int cnt)
 	}
 	prologue ();
 	for (i = 0; i < cnt; i++, p++)
-		process_glyph (p);
+		process_glyph (*p);
 	epilogue ();
 	fclose (fp);
 }
 
+void generate_gcode (char *s)
+{
+	glyph_t **p;
+	int c;
+
+	c = generate_glyph (s);
+	if (c == 0)
+		return;
+	p = get_scaled_image (i_size * dpi, 0);
+	glyph2gcode (p, c);
+	free_image (p);
+}
