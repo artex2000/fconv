@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title (GTK_WINDOW(window), "Font converter");
 
-	hbox = gtk_hbox_new (TRUE, 5);
+	hbox = gtk_hbox_new (FALSE, 10);
 	label1 = gtk_label_new ("Text: ");
 	font_button = gtk_font_button_new_with_font ("Sans Bold 12");
 	d_button = gtk_button_new_with_label ("Draw");
@@ -93,14 +93,13 @@ int main(int argc, char *argv[])
 	gtk_spin_button_set_digits (GTK_SPIN_BUTTON (spin), 2);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin), (double)10);
 
-	gtk_box_pack_start_defaults (GTK_BOX (hbox), label1);
-	gtk_box_pack_start_defaults (GTK_BOX (hbox), str);
-	gtk_box_pack_start_defaults (GTK_BOX (hbox), font_button);
-	gtk_box_pack_start_defaults (GTK_BOX (hbox), d_button);
-	gtk_box_pack_start_defaults (GTK_BOX (hbox), g_button);
-	gtk_box_pack_start_defaults (GTK_BOX (hbox), g_button);
-	gtk_box_pack_start_defaults (GTK_BOX (hbox), label2);
-	gtk_box_pack_start_defaults (GTK_BOX (hbox), spin);
+	gtk_box_pack_start (GTK_BOX (hbox), label1, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), str, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), font_button, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), d_button, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), g_button, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), label2, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), spin, FALSE, FALSE, 0);
 
 	canvas = gtk_drawing_area_new();
 	gtk_widget_set_size_request (canvas, 1200, 600);

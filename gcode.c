@@ -131,7 +131,6 @@ static void process_glyph (glyph_t *g)
 	gpart_t *gp, *next;
 	int i, j;
 
-	fprintf (fp, "G40 ");
 	mstop = 0;
 	for (i = 0, gp = g->col; i < g->cur; i++, gp++) {
 		if (i < g->cur - 1) {
@@ -151,7 +150,6 @@ static void process_glyph (glyph_t *g)
 				curve2gcode (&cv[j]);
 		}
 	}
-	fprintf (fp, "G00 Z0\n");	//router up
 }
 
 static void prologue (void)
@@ -161,10 +159,12 @@ static void prologue (void)
 	fprintf (fp, "M93 S18000\n");
 	fprintf (fp, "G17 G90 G53\n");
 	fprintf (fp, "G04 X4.0\n");
+	fprintf (fp, "G40 ");
 }
 
 static void epilogue (void)
 {
+	fprintf (fp, "G00 Z0\n");	//router up
 	fprintf (fp, "G91 G28 X0 Y0 Z0\n");
 	fprintf (fp, "M92 M95\n");
 	fprintf (fp, "M07 M17\n");

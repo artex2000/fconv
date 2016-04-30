@@ -211,11 +211,11 @@ void get_cbox (glyph_t *g, rect_t *c)
 		for (j = 1; j < l; j++) {
 			if (xmin > gp->points[j].x)
 				xmin = gp->points[j].x;
-			if (xmax < gp->points[j].x)
+			else if (xmax < gp->points[j].x)
 				xmax = gp->points[j].x;
 			if (ymin > gp->points[j].y)
 				ymin = gp->points[j].y;
-			if (ymax < gp->points[j].y)
+			else if (ymax < gp->points[j].y)
 				ymax = gp->points[j].y;
 		}
 	}
