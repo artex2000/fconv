@@ -61,7 +61,7 @@ void generate_image (char *s, cairo_t *ctx, double w, double h)
 	c = generate_glyph (s);
 	if (c == 0)
 		return;
-	p = get_scaled_image (w, h);
+	p = get_scaled_image (w, h, 10);
 	glyph2image (p, c);
 	free_image (p);
 }

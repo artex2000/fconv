@@ -72,8 +72,8 @@ void flip_ver_glyph (glyph_t *g);
 void get_cbox (glyph_t *g, rect_t *c);
 
 int generate_glyph (char *s);
-void generate_gcode (char *s);
-glyph_t ** get_scaled_image (double w, double h);
+void generate_gcode (char *s, double w_inch);
+glyph_t ** get_scaled_image (double w, double h, double border);
 void free_image (glyph_t **g);
 
 

@@ -10,7 +10,6 @@
 #define START_POINT_X 84.511
 #define START_POINT_Y 123.698
 
-double i_size = 15.0; //size of glyph in inches
 double dpi = 300;	//dots per inch
 
 //machine zero coordinates - should be added
@@ -172,11 +171,11 @@ static void epilogue (void)
 	fprintf (fp, "M30\n");
 }
 
-static void glyph2gcode (glyph_t **p, int cnt)
+static void glyph2gcode (glyph_t **p, int cnt, char *fname)
 {
 	int i;
 
-	fp = fopen ("gcode.txt", "w");
+	fp = fopen (fname, "w");
 	if (fp == NULL) {
 		perror ("Error writing to file\n");
 		exit (1);
@@ -188,15 +187,18 @@ static void glyph2gcode (glyph_t **p, int cnt)
 	fclose (fp);
 }
 
-void generate_gcode (char *s)
+void generate_gcode (char *s, double w_inch)
 {
 	glyph_t **p;
-	int c;
+	int c, sz;
+	char fname[26];
 
 	c = generate_glyph (s);
 	if (c == 0)
 		return;
-	p = get_scaled_image (i_size * dpi, 0);
-	glyph2gcode (p, c);
+	sz = (int)(w_inch * 100);
+	snprintf (fname, 26, "%s_%04d.txt", s, sz);
+	p = get_scaled_image (w_inch * dpi, 0, 0);
+	glyph2gcode (p, c, fname);
 	free_image (p);
 }

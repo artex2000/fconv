@@ -47,9 +47,13 @@ static void font_button_clicked (GtkFontButton *button)
 static void g_button_clicked (GObject *button, GtkWidget *str)
 {
 	char *s;
+	double sz;
+	GtkWidget *spin;
 
 	s = (char *) gtk_entry_get_text (GTK_ENTRY (str));
-	generate_gcode (s);
+	spin = (GtkWidget *)g_object_get_data (button, "spin");
+	sz = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin));
+	generate_gcode (s, sz);
 }
 
 static void d_button_clicked (GObject *button, GtkWidget *canvas)
@@ -67,7 +71,8 @@ int main(int argc, char *argv[])
 	GtkWidget *str;
 	GtkWidget *vbox;
 	GtkWidget *hbox;
-	GtkWidget *label;
+	GtkWidget *label1, *label2;
+	GtkWidget *spin;
 	PangoFontDescription *desc;
 
 	gtk_init(&argc, &argv);
@@ -76,19 +81,26 @@ int main(int argc, char *argv[])
 	gtk_window_set_title (GTK_WINDOW(window), "Font converter");
 
 	hbox = gtk_hbox_new (TRUE, 5);
-	label = gtk_label_new ("Text: ");
+	label1 = gtk_label_new ("Text: ");
 	font_button = gtk_font_button_new_with_font ("Sans Bold 12");
 	d_button = gtk_button_new_with_label ("Draw");
 	g_button = gtk_button_new_with_label ("G Code");
 	str = gtk_entry_new ();
 	gtk_entry_set_max_length (GTK_ENTRY (str), 15);
 	gtk_entry_set_text (GTK_ENTRY (str), "AWP");
+	label2 = gtk_label_new ("Width (inch): ");
+	spin = gtk_spin_button_new_with_range (3, 120, 1);
+	gtk_spin_button_set_digits (GTK_SPIN_BUTTON (spin), 2);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin), (double)10);
 
-	gtk_box_pack_start_defaults (GTK_BOX (hbox), label);
+	gtk_box_pack_start_defaults (GTK_BOX (hbox), label1);
 	gtk_box_pack_start_defaults (GTK_BOX (hbox), str);
 	gtk_box_pack_start_defaults (GTK_BOX (hbox), font_button);
 	gtk_box_pack_start_defaults (GTK_BOX (hbox), d_button);
 	gtk_box_pack_start_defaults (GTK_BOX (hbox), g_button);
+	gtk_box_pack_start_defaults (GTK_BOX (hbox), g_button);
+	gtk_box_pack_start_defaults (GTK_BOX (hbox), label2);
+	gtk_box_pack_start_defaults (GTK_BOX (hbox), spin);
 
 	canvas = gtk_drawing_area_new();
 	gtk_widget_set_size_request (canvas, 1200, 600);
@@ -97,7 +109,7 @@ int main(int argc, char *argv[])
 	gtk_box_pack_start_defaults (GTK_BOX (vbox), canvas);
 	gtk_box_pack_start_defaults (GTK_BOX (vbox), hbox);
 
-	g_object_set_data (G_OBJECT (d_button), "canvas", canvas);
+	g_object_set_data (G_OBJECT (g_button), "spin", spin);
 
 	gtk_container_add (GTK_CONTAINER (window), vbox);
 
