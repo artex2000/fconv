@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 	g_button = gtk_button_new_with_label ("G Code");
 	str = gtk_entry_new ();
 	gtk_entry_set_max_length (GTK_ENTRY (str), 15);
-	gtk_entry_set_text (GTK_ENTRY (str), "AWP");
+	gtk_entry_set_text (GTK_ENTRY (str), "G");
 	label2 = gtk_label_new ("Width (inch): ");
 	spin = gtk_spin_button_new_with_range (3, 120, 1);
 	gtk_spin_button_set_digits (GTK_SPIN_BUTTON (spin), 2);
@@ -105,8 +105,8 @@ int main(int argc, char *argv[])
 	gtk_widget_set_size_request (canvas, 1200, 600);
 
 	vbox = gtk_vbox_new (FALSE, 5);
-	gtk_box_pack_start_defaults (GTK_BOX (vbox), canvas);
-	gtk_box_pack_start_defaults (GTK_BOX (vbox), hbox);
+	gtk_box_pack_start (GTK_BOX (vbox), canvas, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
 	g_object_set_data (G_OBJECT (g_button), "spin", spin);
 

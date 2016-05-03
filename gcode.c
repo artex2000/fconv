@@ -133,21 +133,17 @@ static void process_glyph (glyph_t *g)
 
 	mstop = 0;
 	for (i = 0, gp = g->col; i < g->cur; i++, gp++) {
-		if (i < g->cur - 1) {
-			next = gp + 1;
-			if (gp->type == line_to && next->type == line_to)
-				modal_stop ();
-			else
-				modal_smooth ();
-		}
-
 		if (gp->type == move_to || gp->type == line_to) {
+			(gp->ex_stop == 0) ? modal_smooth () : modal_stop ();
 			gp2cut (gp, &ct);
 			cut2gcode (&ct);
 		} else {
 			gp2curve (gp, cv);
-			for (j = 0; j < 4; j++)
+			modal_smooth ();
+			for (j = 0; j < 3; j++) //first 3 appx are smooth
 				curve2gcode (&cv[j]);
+			(gp->ex_stop == 0) ? modal_smooth () : modal_stop ();
+			curve2gcode (&cv[j]);
 		}
 	}
 }

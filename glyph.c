@@ -224,4 +224,58 @@ void get_cbox (glyph_t *g, rect_t *c)
 	c->rb.x = xmax;
 	c->rb.y = ymax;
 }
-			
+
+static int get_angle (gpart_t *a, gpart_t *b)
+{
+	point_t l, m, r;
+	double a_dot_b;
+	double mod_a, mod_b;
+	double ax, bx, ay, by;
+	double angle, a_cos;
+ 
+	m = b->points[0];
+	r = b->points[1];
+	l = (a->type == line_to) ? a->points[0] :
+		(a->type == conic_to) ? a->points[1] : a->points[2];
+
+	ax = l.x - m.x;
+	ay = l.y - m.y;
+	bx = r.x - m.x;
+	by = r.y - m.y;
+
+	a_dot_b = ax * bx + ay * by;
+	mod_a = sqrt (ax * ax + ay * ay);
+	mod_b = sqrt (bx * bx + by * by);
+	a_cos = a_dot_b / (mod_a * mod_b);
+	if (a_cos < -1 && a_cos > -1.01)
+		a_cos  = -1;
+	else if (a_cos > 1 && a_cos < 1.01)
+		a_cos = 1;
+
+	angle = acos (a_cos);
+	return (angle < (M_PI / 2)) ? 1 : 0;
+}
+
+void set_ex_stop (glyph_t *g)
+{
+	gpart_t *gp, *next;
+	int i;
+
+	for (i = 0, gp = g->col; i < g->cur - 1; i++, gp++) {
+		if (gp->type == move_to) {
+			gp->ex_stop = 0;
+			continue;
+		}
+		next = gp + 1;
+		if (next->type == move_to) {
+			gp->ex_stop = 0;
+			continue;
+		}
+		if (gp->type == line_to && next->type == line_to) {
+			gp->ex_stop = 1;
+			continue;
+		}
+		gp->ex_stop = get_angle (gp, next);
+	}
+	gp->ex_stop = 0;
+}

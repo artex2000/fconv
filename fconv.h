@@ -28,6 +28,7 @@ typedef enum {
 typedef struct {
 	point_t points[4];
 	outline_t type;
+	int ex_stop;
 } gpart_t;
 
 typedef struct {
@@ -70,6 +71,7 @@ void rotate_glyph (glyph_t *g, double angle);
 void flip_hor_glyph (glyph_t *g);
 void flip_ver_glyph (glyph_t *g);
 void get_cbox (glyph_t *g, rect_t *c);
+void set_ex_stop (glyph_t *g);
 
 int generate_glyph (char *s);
 void generate_gcode (char *s, double w_inch);

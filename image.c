@@ -48,6 +48,13 @@ static void normalize_glyph (void)
 	}
 }
 
+static void set_glyph_stops (void)
+{
+	int i;
+	for (i = 0; i < symbols; i++)
+		set_ex_stop (image[i]);
+}
+
 static void get_unscaled_size (double *w, double *h)
 {
 	double asc, dsc, adv;
@@ -104,6 +111,7 @@ int generate_glyph (char *s)
 	if (strcmp (s, current)) {
 		fill_glyph (s, i);
 		normalize_glyph ();
+		set_glyph_stops ();
 	}
 	return i;
 }
