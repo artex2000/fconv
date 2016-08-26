@@ -37,12 +37,13 @@ static void normalize_glyph (void)
 	int i;
 	rect_t c;
 	double h;
+        double aa[] = {0.2, 0.8, 0, 0.2, 0.2, 0.2, 0.6, 0.2, 0};
 
 	for (i = 0; i < symbols; i++) {
 		flip_hor_glyph (image[i]);
 		get_cbox (image[i], &c);
 		offset_glyph (image[i], -c.lt.x, -c.lt.y);
-		image[i]->adv = c.rb.x - c.lt.x;
+		image[i]->adv = (c.rb.x - c.lt.x) * (1 + aa[i]);
 		h = c.rb.y - c.lt.y;
 		image[i]->dsc = h - image[i]->asc;
 	}
