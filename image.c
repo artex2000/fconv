@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "fconv.h"
+#include "conf.h"
 
 static char current[20];
 static glyph_t **image;
@@ -37,7 +38,7 @@ static void normalize_glyph (void)
 	int i;
 	rect_t c;
 	double h;
-        double aa[] = {0.2, 0.8, 0, 0.2, 0.2, 0.2, 0.6, 0.2, 0};
+        double *aa = get_kern();
 
 	for (i = 0; i < symbols; i++) {
 		flip_hor_glyph (image[i]);

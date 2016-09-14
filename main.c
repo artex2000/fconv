@@ -6,6 +6,7 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "fconv.h"
+#include "conf.h"
 
 PangoFontMap *map;
 PangoContext *ctx;
@@ -75,6 +76,11 @@ int main(int argc, char *argv[])
 	GtkWidget *spin;
 	PangoFontDescription *desc;
 
+        if (argc == 2) {
+            if (get_conf (argv[1]))
+                printf ("Error reading configuration. Use defaults\n");
+        }
+
 	gtk_init(&argc, &argv);
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -82,12 +88,12 @@ int main(int argc, char *argv[])
 
 	hbox = gtk_hbox_new (FALSE, 10);
 	label1 = gtk_label_new ("Text: ");
-	font_button = gtk_font_button_new_with_font ("Gunplay 12");
+	font_button = gtk_font_button_new_with_font (get_fontname());
 	d_button = gtk_button_new_with_label ("Draw");
 	g_button = gtk_button_new_with_label ("G Code");
 	str = gtk_entry_new ();
 	gtk_entry_set_max_length (GTK_ENTRY (str), 15);
-	gtk_entry_set_text (GTK_ENTRY (str), "NOPARKING");
+	gtk_entry_set_text (GTK_ENTRY (str), get_string());
 	label2 = gtk_label_new ("Width (inch): ");
 	spin = gtk_spin_button_new_with_range (3, 120, 1);
 	gtk_spin_button_set_digits (GTK_SPIN_BUTTON (spin), 2);
@@ -130,7 +136,7 @@ int main(int argc, char *argv[])
 	gtk_widget_show_all(window);
 	map = pango_ft2_font_map_new ();
 	ctx = pango_font_map_create_context (map);
-	desc = pango_font_description_from_string ("Gunplay 12");
+	desc = pango_font_description_from_string (get_fontname());
 	set_font (desc);
 
 	gtk_main();

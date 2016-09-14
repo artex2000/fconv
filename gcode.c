@@ -3,6 +3,7 @@
 #include <errno.h>
 
 #include "fconv.h"
+#include "conf.h"
 
 #define MACHINE_ZERO_X 89.219
 #define MACHINE_ZERO_Y 136.831
@@ -21,7 +22,7 @@ static double z_t_x = START_POINT_X - MACHINE_ZERO_X;
 static double z_t_y = START_POINT_Y - MACHINE_ZERO_Y;
 
 //vertical router movement
-static double z_drill = -4;
+static double z_drill = -4.061;
 static double z_hang = -2.5;
 static double z_current = 0;
 
@@ -183,18 +184,37 @@ static void glyph2gcode (glyph_t **p, int cnt, char *fname)
 	fclose (fp);
 }
 
+static void init_gcode_conf (void)
+{
+
+    feed_cut = get_feedrate ();
+    z_hang = get_hang ();
+    z_drill = get_drill ();
+    z_t_x = get_xorigin ();
+    z_t_y = get_yorigin ();
+}
+
 void generate_gcode (char *s, double w_inch)
 {
 	glyph_t **p;
-	int c, sz;
+	int c;
+        double xs, ys;
 	char fname[26];
 
 	c = generate_glyph (s);
 	if (c == 0)
 		return;
-	sz = (int)(w_inch * 100);
-	snprintf (fname, 26, "%s_%04d.txt", s, sz);
-	p = get_scaled_image (w_inch * dpi, 0, 0);
+	snprintf (fname, 26, "%s_gcode.txt", s);
+
+        init_gcode_conf ();
+        xs = get_xscale ();
+        ys = get_yscale ();
+
+        if (!xs && !ys)
+            p = get_scaled_image (w_inch * dpi, 0, 0);
+        else
+            p = get_scaled_image (xs * dpi, ys * dpi, 0);
+
 	glyph2gcode (p, c, fname);
 	free_image (p);
 }
